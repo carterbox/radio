@@ -1,0 +1,99 @@
+#ifndef __BREAK_HPP_INCLUDED__
+#define __BREAK_HPP_INCLUDED__
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
+
+using namespace cv;
+using namespace std;
+
+struct frame;
+
+bool sameScene( frame A, frame B, const int method, bool greaterThan, const double threshold )
+//Return true if the criteria are met for the frames to be in the same scene.
+//TODO: Make less than threshold comparison if greaterThan == false.
+{
+	if( compareHist(A.bag, B.bag, method) > threshold )
+	{
+		
+		return true;
+	}
+	else
+		return false;
+}
+
+searchWorker( const VideoCapture* video, vector<frame>* frames,
+			  BOWImgDescriptorExtractor* Biggie,
+			  stack<frame>* todo, const int method, const double threshold )
+{
+	assert(frames->empty); assert(todo->size() > 2);
+	frame A = todo->top(); todo->pop();
+	
+	while(!todo->empty())
+	//determine if A and B are in the same scene
+	{
+		frame B = todo->top(); todo->pop();
+		
+		if(sameScene( A, B, method, true, threshold ))
+		//Update progress bar. Compare B with next frame. 
+		//TODO: make a progress bar
+		{
+			frames->push_back(A);
+			A = B;
+		}
+		else
+		//spawn a new node half way between frame A and B
+		{
+			int newNode = (A.index + B.index)/2; 
+			if( newNode = A.index )
+			//There is no new node. Mark B as the start of a new scene. Compare
+			//B with next frame.
+			{
+				B.newScene = true;
+				frames->push_back(A);
+				A = B;
+			}
+			else()
+			//There is a new node. Push B onto the stack. Push the new node onto
+			//the stack. Compare A with the new node.
+			{
+				todo->push(B);
+				
+				video->set( CV_CAP_PROP_POS_FRAMES, newNode );
+				frame newframe;
+        		newframe.index = newNode;
+        		cap >> newframe.img;
+        		
+        		vector<vector<int>>* noThanks;
+    			Biggie->compute( newNode.img, newNode.keypoints,
+    					newNode.bag, noThanks, newNode.descriptors );
+        		
+        		todo->push(newframe);
+        		
+			}
+		}
+	}
+}
+
+stack<int> searchForBreaks( const VideoCapture* video, vector<frame>* frames,
+							BOWImgDescriptorExtractor* Biggie,
+							const int method, const double threshold )
+{
+			
+	stack<int> breaks;
+	stack<frame> todo;
+	
+	//put all the frames into todo;
+	while(!frames->empty())
+	{
+		todo.push(frame->back());
+		frame.pop_back();
+	}
+	
+	//searchWorker();
+			
+}
+
+
+
+#endif
