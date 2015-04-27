@@ -4,6 +4,7 @@
 #define __SEGMENT_HPP_INCLUDED__
 
 #include "include/frame.hpp"
+#include "include/break.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -33,7 +34,7 @@ int main(int argc, char** argv) {
 	
 	namedWindow("preview",1);
     
-	vector<<Frame> frames;// Make a vector to store the frames.
+	vector<Frame> frames;// Make a vector to store the frames.
 	int videoEnd = cap.get(CV_CAP_PROP_FRAME_COUNT);
 
 	//TODO: Autocalculate 2fps from frame rate.
@@ -92,12 +93,12 @@ int main(int argc, char** argv) {
   cout << "Searching for breaks..." << endl;
   vector<int> breaks = SearchForBreaks(&cap, &frames, &Biggie, CV_COMP_CORREL, std::strtof(argv[2], nullptr)); 
 
-  //saveMat( bag, "BOW", "TestVideo.yaml", path("./") );
+  ///SaveMat( bag, "BOW", "TestVideo.yaml", path("./") );
 
   cout << "Saving breaks..." << endl;
   Mat break_locations = Mat( breaks, false);
-  break_locations.convertTo( times, CV_32F, 1/fps, 0 );
-  saveMat( break_locations, "Scene Changes", "TestVideo.yaml", path("./output/") );
+  break_locations.convertTo( break_locations, CV_32F, 1/fps, 0 );
+  SaveMat( break_locations, "Scene Changes", "TestVideo.yaml", path("./output/") );
   cout << "DONE." << endl;
 
   // the camera will be deinitialized automatically in VideoCapture destructor
