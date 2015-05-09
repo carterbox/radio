@@ -8,43 +8,38 @@ using namespace std;
 using namespace boost::filesystem;
 using namespace boost::posix_time;
 
-Mat histogram( Mat data, const int numbins )
-//numbins > 0
-{
-	Mat histogram = Mat( numbins, 1, CV_16UC1, Scalar(0) );
+// MakeHistogram creates a histogram from the Mat data.
+Mat MakeHistogram(Mat data, const int knumbins) {
+    Mat histogram = Mat( knumbins, 1, CV_16UC1, Scalar(0) );
 	
-	
-	for( int j = 0; j < data.rows; j++ ) //for every row in that Mat
-	{
-		if( data.at<int>(j,0) < numbins )
-		//data must be greater than 0 and less than numbins
-		{
+	for (int j = 0; j < data.rows; j++) { 
+		// data must be greater than 0 and less than numbins
+		if( data.at<int>(j,0) < knumbins ) {
+			// count the number in that row by adding 1 to the histogram
 			histogram.at<int>( data.at<int>(j,0),0 ) += 1;
-			//count the number in that row by adding 1 to the histogram
 		}
-		else
+		else {
 			perror("Not enough bins or negative values.\n"); 
-		
+	    }
 	}
 	
 	return histogram;
 }
 
-int loadMat( vector<Mat> *data_vector, const path dir )
-//loads data from YAML (.yml) files into the vector data
-{
+// Loads data from YAML (.yml) files into the vector data
+int LoadMat(vector<Mat> *data_vector, const path dir) {
 	Mat temp;
 	string file = dir.native();
 	
-	try{
+	try {
 		FileStorage fs( file, FileStorage::READ );
 		fs["SIFT_membership"] >> temp;
 		fs.release();
 		data_vector->push_back(temp);
 		return 1;//returns the number of files loaded.
 	}
-	catch (Exception& e){
+	catch (Exception& e) {
 		cout << "Failed to read";
 		return 0;
 	}
-} 
+}
